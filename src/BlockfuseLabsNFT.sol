@@ -19,7 +19,7 @@ contract BlockfuseLabsNFT is ERC1155, Ownable, ERC1155Burnable {
         uint256 id,
         uint256 amount,
         bytes memory data
-    ) public onlyOwner {
+    ) public {
         _mint(account, id, amount, data);
     }
 
