@@ -7,20 +7,29 @@ import {ERC1155Burnable} from "@openzeppelin/contracts/token/ERC1155/extensions/
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 error NO_TRANSFER_ALLOWED();
 
+interface Faucet {
+    function getTokenId() external view returns (uint);
+}
+
 contract BlockfuseLabsNFT is ERC1155, Ownable, ERC1155Burnable {
+    address faucetAddress;
+
     constructor(address initialOwner) ERC1155("") Ownable(initialOwner) {}
 
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
 
-    function mint(
-        address account,
-        uint256 id,
-        uint256 amount,
-        bytes memory data
-    ) public {
-        _mint(account, id, amount, data);
+    function setFaucetAddress(address new_address) external onlyOwner {
+        require(new_address != address(0), "INVALID_ADDRESS");
+        faucetAddress = new_address;
+    }
+
+    function mint(address account, uint256 amount, bytes memory data) public {
+        Faucet faucet = Faucet(faucetAddress);
+        uint tokenId = faucet.getTokenId();
+        require(balanceOf(msg.sender, tokenId) == 0, "ALREADY_MINTED");
+        _mint(account, tokenId, amount, data);
     }
 
     function mintBatch(
